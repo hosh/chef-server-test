@@ -1,7 +1,7 @@
 require 'cheffish'
 require 'chef_metal'
 
-repo_base_dir = File.join(File.dirname(__FILE__), '..', '..', '..')
+repo_base_dir = ENV['PWD']
 vm_dir =        File.join(repo_base_dir, 'vms')
 cluster_repo =  File.join(vm_dir, 'repo')
 

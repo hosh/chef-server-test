@@ -9,4 +9,4 @@ cluster_repo =  File.join(vm_dir, 'repo')
 vagrant_cluster vm_dir
 
 directory cluster_repo
-with_chef_local_server :chef_repo_path => cluster_repo
+with_chef_local_server :chef_repo_path => repo_base_dir

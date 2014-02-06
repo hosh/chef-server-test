@@ -3,4 +3,10 @@ machine "chef-server" do
   recipe 'chef-server'
 
   attribute %w(chef-server api_fqdn), 'chef-server.local'
+
+  provisioner_options({
+    'vagrant_config' => <<ENDCONFIG
+config.vm.synced_folder "#{File.join(ENV['PWD'], 'cache')}", '/tmp/cache'
+ENDCONFIG
+  })
 end

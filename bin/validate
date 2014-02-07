@@ -6,12 +6,17 @@ require 'thor'
 require 'mixlib/shellout'
 
 BASE_DIR = File.join(File.dirname(__FILE__), '..')
-SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
+SHELLOUT_DEFAULTS = { cwd: BASE_DIR, live_stream: $> }
 
 class ValidateCLI < Thor
   desc 'reset', 'resets tests'
   def reset
     run_command 'rm -fr nodes/ clients'
+  end
+
+  desc 'install', 'runs install test'
+  def install
+    run_command 'chef-client -z -o tests::install'
   end
 
   private

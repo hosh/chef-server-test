@@ -1,3 +1,0 @@
-[submodule "cookbooks/chef-server"]
-	path = cookbooks/chef-server
-	url = git://github.com/opscode-cookbooks/chef-server.git

@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# Requires Ruby 1.9+
+
+require 'thor'
+require 'mixlib/shellout'
+
+BASE_DIR = File.join(File.dirname(__FILE__), '..')
+SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
+
+class ValidateCLI < Thor
+  desc 'reset', 'resets tests'
+  def reset
+    run_command 'rm -fr nodes/ clients'
+  end
+
+  private
+  def run_command(cmd, options = {})
+    options = SHELLOUT_DEFAULTS.merge(options)
+    cmd = Mixlib::ShellOut.new(cmd, options)
+    cmd.run_command
+  end
+
+  def run_command!(cmd, options = {})
+    cmd = run_command(cmd, options)
+    return if cmd.status.success?
+    $stderr.print "ERROR: #{cmd.exitstatus}\nSTDOUT:\n#{cmd.stdout}\n\nSTDERR:\n#{cmd.stderr}\n"
+    exit 1
+  end
+end
+
+ValidateCLI.start(ARGV)

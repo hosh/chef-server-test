@@ -6,27 +6,41 @@ require 'thor'
 require 'mixlib/shellout'
 
 BASE_DIR = File.join(File.dirname(__FILE__), '..')
-SHELLOUT_DEFAULTS = { cwd: BASE_DIR, live_stream: $> }
+SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
+DEFAULT_CHEF_CLIENT_FLAGS = "-z -l info -F doc --color --no-fork"
 
 class ValidateCLI < Thor
   desc 'reset', 'resets tests'
   def reset
-    run_command 'rm -fr nodes/ clients'
+    shell_out 'rm -fr nodes/ clients'
+    shell_out 'vagrant destroy -f', cwd: File.join(BASE_DIR, 'vms')
   end
 
   desc 'install', 'runs install test'
   def install
-    run_command 'chef-client -z -o tests::install'
+    chef_client 'tests::install'
+  end
+
+  desc 'test', 'something'
+  def test
+    shell_out 'tail -f /var/log/system.log'
   end
 
   private
-  def run_command(cmd, options = {})
-    options = SHELLOUT_DEFAULTS.merge(options)
+  def chef_client(recipes)
+    cmd = shell_out "chef-client #{DEFAULT_CHEF_CLIENT_FLAGS} -o #{recipes}"
+    return if cmd.status.success?
+    $stderr.print "ERROR: #{cmd.exitstatus}\nSTDERR:\n #{cmd.stderr}\n"
+  end
+
+  def shell_out(cmd, options = {})
+    options = SHELLOUT_DEFAULTS.merge(timeout: 3600).merge(options)
     cmd = Mixlib::ShellOut.new(cmd, options)
+    cmd.live_stream = STDOUT
     cmd.run_command
   end
 
-  def run_command!(cmd, options = {})
+  def shell_out!(cmd, options = {})
     cmd = run_command(cmd, options)
     return if cmd.status.success?
     $stderr.print "ERROR: #{cmd.exitstatus}\nSTDOUT:\n#{cmd.stdout}\n\nSTDERR:\n#{cmd.stderr}\n"

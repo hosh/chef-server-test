@@ -21,7 +21,8 @@ class ValidateCLI < Thor
   def install(candidate_pkg_path = nil)
     normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
     generate_test_config!(normalized_candidate_pkg_path)
-    #chef_client 'tests::install'
+    puts "Running install test on: #{normalized_candidate_pkg_path}"
+    chef_client 'tests::install'
   end
 
   private
@@ -48,7 +49,7 @@ class ValidateCLI < Thor
   end
 
   def chef_client(recipes)
-    cmd = shell_out "chef-client #{DEFAULT_CHEF_CLIENT_FLAGS} -o #{recipes}"
+    cmd = shell_out "chef-client #{ChefServerTest::Config.chef_client_flags} -o #{recipes}"
     return if cmd.status.success?
     $stderr.print "ERROR: #{cmd.exitstatus}\nSTDERR:\n #{cmd.stderr}\n"
   end

@@ -49,11 +49,13 @@ module ChefServerTest
       {
         'id'            => 'default',
         'base_path'     => base_path,
-        'candidate_pkg' => candidate_pkg,
         'vms_path'      => vms_path,
         'cluster_repo'  => cluster_repo,
         'cache_path'    => cache_path,
-        'releases_path' => releases_path
+        'releases_path' => releases_path,
+
+        'host_candidate_pkg_path' => candidate_pkg,
+        'candidate_pkg' => (candidate_pkg.nil? || candidate_pkg.empty? ? nil : File.basename(candidate_pkg)),
       }
     end
 

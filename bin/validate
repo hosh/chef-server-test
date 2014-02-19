@@ -1,32 +1,52 @@
 #!/usr/bin/env ruby
-
 # Requires Ruby 1.9+
+
+BASE_DIR = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
+
+$:.unshift(File.join(BASE_DIR, 'lib'))
 
 require 'thor'
 require 'mixlib/shellout'
-
-BASE_DIR = File.join(File.dirname(__FILE__), '..')
-SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
-DEFAULT_CHEF_CLIENT_FLAGS = "-z -l info -F doc --color --no-fork"
+require 'chef-server-test/config'
 
 class ValidateCLI < Thor
   desc 'reset', 'resets tests'
   def reset
-    shell_out 'rm -fr nodes/ clients'
+    shell_out 'rm -fr nodes/ clients/'
     shell_out 'vagrant destroy -f', cwd: File.join(BASE_DIR, 'vms')
   end
 
-  desc 'install', 'runs install test'
-  def install
-    chef_client 'tests::install'
-  end
-
-  desc 'test', 'something'
-  def test
-    shell_out 'tail -f /var/log/system.log'
+  desc 'install [CANDIDATE PKG]', 'runs install test'
+  def install(candidate_pkg_path = nil)
+    normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
+    generate_test_config!(normalized_candidate_pkg_path)
+    #chef_client 'tests::install'
   end
 
   private
+  def ensure_base_path!
+    ChefServerTest::Config.with_base_path(BASE_DIR) unless ChefServerTest::Config.base_path
+  end
+
+  def generate_test_config!(candidate_pkg_path)
+    ensure_base_path!
+    ChefServerTest::Config.
+      with_candidate_pkg(candidate_pkg_path).
+      generate_data_bag!
+  end
+
+  # TODO: if the absolute path is outside the cache dir, then rsync it over
+  def normalize_candidate_pkg_path!(path)
+    ensure_base_path!
+    normalized_path = ChefServerTest::Config.normalize_candidate_pkg(path)
+    unless normalized_path
+      $stderr.puts "Error: Unable to find candidate package at #{normalized_path}"
+      exit 1
+    end
+    return normalized_path
+  end
+
   def chef_client(recipes)
     cmd = shell_out "chef-client #{DEFAULT_CHEF_CLIENT_FLAGS} -o #{recipes}"
     return if cmd.status.success?

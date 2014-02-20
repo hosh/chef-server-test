@@ -61,7 +61,8 @@ module ChefServerTest
         'releases_path' => releases_path,
 
         'host_candidate_pkg_path' => candidate_pkg,
-        'candidate_pkg' => (candidate_pkg.nil? || candidate_pkg.empty? ? nil : File.basename(candidate_pkg)),
+        'candidate_pkg'           => (candidate_pkg.nil? || candidate_pkg.empty? ? nil : File.basename(candidate_pkg)),
+        'install_candidate'       => install_candidate
       }
     end
 

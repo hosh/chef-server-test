@@ -1,7 +1,8 @@
 
-test_config     = data_bag_item 'tests', 'default'
-host_cache_path = test_config['cache_path']
-candidate_pkg   = test_config['candidate_pkg']
+test_config       = data_bag_item 'tests', 'default'
+host_cache_path   = test_config['cache_path']
+candidate_pkg     = test_config['candidate_pkg']
+install_candidate = !test_config['install_candidate']
 
 machine "chef-server" do
   tag 'chef-server'
@@ -9,7 +10,7 @@ machine "chef-server" do
   # Some of this stuff would need to support Windows
   attribute %w(chef-server api_fqdn), 'chef-server'
   attribute %w(chef-server file_cache_path), '/tmp/cache/releases'
-  attribute %w(chef-server package_file), "/tmp/cache/#{candidate_pkg}" if candidate_pkg
+  attribute %w(chef-server package_file), "/tmp/cache/#{candidate_pkg}" if candidate_pkg && install_candidate
 
   local_provisioner_options = {
     'vagrant_config' => <<ENDCONFIG

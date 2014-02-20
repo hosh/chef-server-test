@@ -43,6 +43,12 @@ module ChefServerTest
     default(:releases_path)  { File.join cache_path, 'releases' }
     default(:data_bags_path) { File.join base_path, 'data_bags' }
 
+    # Internal settings, usually test-dependent
+
+    # If a candidate package is available, install it.
+    # Upgrade tests will set set this to false.
+    default :install_candidate, true
+
     # Glue layer for generating config for chef-client
 
     def self.to_hash

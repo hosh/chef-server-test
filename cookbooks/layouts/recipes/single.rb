@@ -1,3 +1,12 @@
+test_config = data_bag_item 'tests', 'default'
+
 include_recipe 'stacks::vagrant'
-include_recipe 'os::ubuntu-10.04'
+
+case test_config['package_info']['platform_info']
+when 'ubuntu.10.04' then include_recipe 'os::ubuntu-10.04'
+when 'ubuntu.11.04' then include_recipe 'os::ubuntu-11.04'
+when 'ubuntu.12.04' then include_recipe 'os::ubuntu-12.04'
+else raise "Unsupported platform #{test_config['package_info']['platform_info']}"
+end
+
 include_recipe 'machines::chef-server'

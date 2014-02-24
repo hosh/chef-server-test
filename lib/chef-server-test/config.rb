@@ -52,6 +52,9 @@ module ChefServerTest
     # Glue layer for generating config for chef-client
 
     def self.to_hash
+      # TODO: Make candidate_pkg always required and cut out the fat here
+      package_info = ChefServerTest::PackageInfo.new(File.basename(candidate_pkg)) if candidate_pkg && !candidate_pkg.empty?
+
       {
         'id'            => 'default',
         'base_path'     => base_path,
@@ -61,8 +64,10 @@ module ChefServerTest
         'releases_path' => releases_path,
 
         'host_candidate_pkg_path' => candidate_pkg,
-        'candidate_pkg'           => (candidate_pkg.nil? || candidate_pkg.empty? ? nil : File.basename(candidate_pkg)),
-        'install_candidate'       => install_candidate
+        'candidate_pkg'           => (package_info ? package_info.package_name : nil ),
+        'install_candidate'       => install_candidate,
+
+        'package_info' => (package_info ? package_info.to_hash : nil )
       }
     end
 

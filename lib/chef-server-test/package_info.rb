@@ -22,6 +22,16 @@ module ChefServerTest
 
     let(:valid?) { !match_data.nil? and (platform == 'ubuntu' && package_type == 'deb') || (platform == 'el' && package_type == 'rpm') }
 
+    let(:to_hash) do
+      {
+        'version'          => version,
+        'platform'         => platform,
+        'platform_version' => platform_version,
+        'platform_info'    => platform_info,
+        'arch'             => arch
+      }
+    end
+
     def initialize(package_name)
       @package_name = package_name
     end

@@ -9,6 +9,7 @@ $:.unshift(File.join(BASE_DIR, 'lib'))
 require 'thor'
 require 'mixlib/shellout'
 require 'chef-server-test/config'
+require 'chef-server-test/package_info'
 
 class ValidateCLI < Thor
   desc 'reset', 'resets tests'
@@ -19,15 +20,20 @@ class ValidateCLI < Thor
 
   desc 'install [CANDIDATE PKG]', 'runs install test'
   def install(candidate_pkg_path = nil)
+    ensure_valid_package_name! candidate_pkg_path if candidate_pkg_path
+
     reset # TODO: Add --no-reset option
     normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
     generate_test_config!(normalized_candidate_pkg_path)
+
     puts "Running install test on: #{normalized_candidate_pkg_path}"
     chef_client 'tests::install'
   end
 
   desc 'upgrade [CANDIDATE PKG]', 'runs upgrade test'
   def upgrade(candidate_pkg_path)
+    ensure_valid_package_name! candidate_pkg_path
+
     reset # TODO: Add --no-reset option
     normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
 
@@ -42,6 +48,14 @@ class ValidateCLI < Thor
   private
   def ensure_base_path!
     ChefServerTest::Config.with_base_path(BASE_DIR) unless ChefServerTest::Config.base_path
+  end
+
+  def ensure_valid_package_name!(_pkg)
+    package_info = ChefServerTest::PackageInfo.new(File.basename(_pkg))
+    return package_info if package_info.valid?
+
+    $stderr.puts "Error: #{_pkg} does not have valid filename format"
+    exit 2
   end
 
   def generate_test_config!(candidate_pkg_path)

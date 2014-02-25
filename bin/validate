@@ -30,12 +30,14 @@ class ValidateCLI < Thor
     chef_client 'tests::install'
   end
 
+  option :'upgrade-from'
   desc 'upgrade [CANDIDATE PKG]', 'runs upgrade test'
   def upgrade(candidate_pkg_path)
     ensure_valid_package_name! candidate_pkg_path
 
     reset # TODO: Add --no-reset option
     normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
+    ChefServerTest::Config.upgrade_from_version options[:'upgrade-from']
 
     # Disable initial install of candidate pkg so that we can test upgrade
     ChefServerTest::Config.install_candidate false

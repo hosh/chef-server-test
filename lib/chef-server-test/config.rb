@@ -35,6 +35,10 @@ module ChefServerTest
     # bin/validate will accept this in the command line option
     configurable :candidate_pkg
 
+    # This sets the released version from which upgrade tests
+    # should upgrade from.
+    configurable :upgrade_from_version
+
     # Derived values
     default(:vms_path)       { File.join base_path, 'vms' }
     default(:cluster_repo)   { File.join vms_path, 'repo' }
@@ -52,6 +56,9 @@ module ChefServerTest
     # Glue layer for generating config for chef-client
 
     def self.to_hash
+      # TODO: Make candidate_pkg always required and cut out the fat here
+      package_info = ChefServerTest::PackageInfo.new(File.basename(candidate_pkg)) if candidate_pkg && !candidate_pkg.empty?
+
       {
         'id'            => 'default',
         'base_path'     => base_path,
@@ -61,8 +68,11 @@ module ChefServerTest
         'releases_path' => releases_path,
 
         'host_candidate_pkg_path' => candidate_pkg,
-        'candidate_pkg'           => (candidate_pkg.nil? || candidate_pkg.empty? ? nil : File.basename(candidate_pkg)),
-        'install_candidate'       => install_candidate
+        'candidate_pkg'           => (package_info ? package_info.package_name : nil ),
+        'install_candidate'       => install_candidate,
+        'upgrade_from_version'    => upgrade_from_version,
+
+        'package_info' => (package_info ? package_info.to_hash : nil )
       }
     end
 

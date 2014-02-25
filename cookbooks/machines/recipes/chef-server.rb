@@ -3,6 +3,7 @@ test_config       = data_bag_item 'tests', 'default'
 host_cache_path   = test_config['cache_path']
 candidate_pkg     = test_config['candidate_pkg']
 install_candidate = test_config['install_candidate']
+upgrade_from      = test_config['upgrade_from_version']
 
 machine "chef-server" do
   tag 'chef-server'
@@ -12,6 +13,7 @@ machine "chef-server" do
   attribute %w(chef-server file_cache_path), '/tmp/cache/releases'
   attribute %w(chef-server package_file), "/tmp/cache/#{candidate_pkg}" if candidate_pkg && install_candidate
   attribute %w(chef-server candidate_pkg), "/tmp/cache/#{candidate_pkg}"
+  attribute %w(chef-server version), upgrade_from if upgrade_from
 
   local_provisioner_options = {
     'vagrant_config' => <<ENDCONFIG

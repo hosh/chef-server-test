@@ -1,102 +1,34 @@
 #!/usr/bin/env ruby
 # Requires Ruby 1.9+
-
-BASE_DIR = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
-
-$:.unshift(File.join(BASE_DIR, 'lib'))
+$:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'thor'
-require 'mixlib/shellout'
 require 'chef-server-test/config'
-require 'chef-server-test/package_info'
 
 class ValidateCLI < Thor
   desc 'reset', 'resets tests'
   def reset
-    shell_out 'rm -fr nodes/ clients/'
-    shell_out 'vagrant destroy -f', cwd: File.join(BASE_DIR, 'vms')
+    ChefServerTest::Tasks::Reset.execute!
   end
 
   desc 'install [CANDIDATE PKG]', 'runs install test'
-  def install(candidate_pkg_path = nil)
-    ensure_valid_package_name! candidate_pkg_path if candidate_pkg_path
-
-    reset # TODO: Add --no-reset option
-    normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
-    generate_test_config!(normalized_candidate_pkg_path)
-
-    puts "Running install test on: #{normalized_candidate_pkg_path}"
-    chef_client 'tests::install'
+  def install(candidate_pkg_path)
+    require 'chef-server-test/tests/install'
+    ChefServerTest::Tests::Install.
+      new(candidate_pkg_path: candidate_pkg_path).
+      execute!
   end
 
   option :'upgrade-from'
   desc 'upgrade [CANDIDATE PKG]', 'runs upgrade test'
   def upgrade(candidate_pkg_path)
-    ensure_valid_package_name! candidate_pkg_path
-
-    reset # TODO: Add --no-reset option
-    normalized_candidate_pkg_path = normalize_candidate_pkg_path!(candidate_pkg_path) if candidate_pkg_path
-    ChefServerTest::Config.upgrade_from_version options[:'upgrade-from']
-
-    # Disable initial install of candidate pkg so that we can test upgrade
-    ChefServerTest::Config.install_candidate false
-
-    generate_test_config!(normalized_candidate_pkg_path)
-    puts "Running upgrade test on: #{normalized_candidate_pkg_path}"
-    chef_client 'tests::upgrade'
+    require 'chef-server-test/tests/upgrade'
+    ChefServerTest::Tests::Upgrade.
+      new(candidate_pkg_path: candidate_pkg_path,
+          upgrade_from:       options[:'upgrade-from']).
+      execute!
   end
 
-  private
-  def ensure_base_path!
-    ChefServerTest::Config.with_base_path(BASE_DIR) unless ChefServerTest::Config.base_path
-  end
-
-  def ensure_valid_package_name!(_pkg)
-    package_info = ChefServerTest::PackageInfo.new(File.basename(_pkg))
-    return package_info if package_info.valid?
-
-    $stderr.puts "Error: #{_pkg} does not have valid filename format"
-    exit 2
-  end
-
-  def generate_test_config!(candidate_pkg_path)
-    ensure_base_path!
-    ChefServerTest::Config.
-      with_candidate_pkg(candidate_pkg_path).
-      generate_data_bag!
-  end
-
-  # TODO: if the absolute path is outside the cache dir, then rsync it over
-  def normalize_candidate_pkg_path!(path)
-    ensure_base_path!
-    normalized_path = ChefServerTest::Config.normalize_candidate_pkg(path)
-    unless normalized_path
-      $stderr.puts "Error: Unable to find candidate package at #{normalized_path}"
-      exit 1
-    end
-    return normalized_path
-  end
-
-  def chef_client(recipes)
-    cmd = shell_out "chef-client #{ChefServerTest::Config.chef_client_flags} -o #{recipes}"
-    return if cmd.status.success?
-    $stderr.print "ERROR: #{cmd.exitstatus}\nSTDERR:\n #{cmd.stderr}\n"
-  end
-
-  def shell_out(cmd, options = {})
-    options = SHELLOUT_DEFAULTS.merge(timeout: 3600).merge(options)
-    cmd = Mixlib::ShellOut.new(cmd, options)
-    cmd.live_stream = STDOUT
-    cmd.run_command
-  end
-
-  def shell_out!(cmd, options = {})
-    cmd = run_command(cmd, options)
-    return if cmd.status.success?
-    $stderr.print "ERROR: #{cmd.exitstatus}\nSTDOUT:\n#{cmd.stdout}\n\nSTDERR:\n#{cmd.stderr}\n"
-    exit 1
-  end
 end
 
 ValidateCLI.start(ARGV)

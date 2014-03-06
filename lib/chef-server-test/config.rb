@@ -39,6 +39,11 @@ module ChefServerTest
     # should upgrade from.
     configurable :upgrade_from_version
 
+    # This option is set when data bag is generated. This ensures each
+    # run is unique. You can set this externally so something else (such as
+    # Jenkins) can drive this.
+    configurable :test_run_timestamp
+
     # Derived values
     default(:vms_path)       { File.join base_path, 'vms' }
     default(:cluster_repo)   { File.join vms_path, 'repo' }
@@ -46,6 +51,8 @@ module ChefServerTest
     default(:cache_path)     { File.join base_path, 'cache' }
     default(:releases_path)  { File.join cache_path, 'releases' }
     default(:data_bags_path) { File.join base_path, 'data_bags' }
+
+    default(:host_log_path)  { File.join cache_path, 'logs', test_run_timestamp }
 
     # Internal settings, usually test-dependent
 
@@ -72,7 +79,11 @@ module ChefServerTest
         'install_candidate'       => install_candidate,
         'upgrade_from_version'    => upgrade_from_version,
 
-        'package_info' => (package_info ? package_info.to_hash : nil )
+        'package_info' => (package_info ? package_info.to_hash : nil ),
+
+        'test_run_timestamp' => test_run_timestamp,
+        'host_log_path' => host_log_path,
+        'local_log_path' => File.join('/', 'tmp', 'cache', test_run_timestamp)
       }
     end
 
@@ -82,10 +93,16 @@ module ChefServerTest
     end
 
     def self.generate_data_bag!
+      ensure_test_run_timestamp!
       ensure_test_data_bag_dir!
       File.open(File.join(data_bags_path, 'tests', 'default.json'), "w") do |f|
         f.puts to_json
       end
+    end
+
+    def self.ensure_test_run_timestamp!
+      self.test_run_timestamp "#{Time.now.utc.strftime("%Y-%m-%d.%H%M%S%L")}.#{Process.pid}" unless self.test_run_timestamp
+      self
     end
 
     def self.normalize_candidate_pkg(pkg_path)

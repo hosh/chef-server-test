@@ -13,6 +13,10 @@ directory log_path do
   action :create
 end
 
+# Some distros require utf-8 to be explicitly declared
+env = { 'LANG' => 'en_US.UTF-8' }
+
 execute "pedant_full" do
   command "chef-server-ctl test --all -L #{pedant_http_log} -J #{pedant_junit_log} > #{pedant_log}"
+  environment env
 end

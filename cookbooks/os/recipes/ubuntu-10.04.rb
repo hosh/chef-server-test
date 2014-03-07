@@ -1,3 +1,3 @@
-vagrant_box 'opscode-ubuntu-10.04' do
-  url 'http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.04.box'
+vagrant_box 'opscode-ubuntu-10.04-provisionerless' do
+  url 'http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-10.04_chef-provisionerless.box'
 end

@@ -1,11 +1,11 @@
-= chef-server-test =
+# chef-server-test
 
-== Overview ==
+## Overview
 
 This project uses chef-metal to stand up VMs for testing OSC omnibus packages. It will
 currently test installs and upgrades. There are a lot of room for improvements.
 
-== Installing ==
+## Installing
 
 Make sure you have:
 
@@ -22,7 +22,7 @@ git clone git://github.com/hosh/chef-server-test.git
 Create a directory called ````cache/```` inside the repo. Copy the deb or rpm
 you want to test into the directory.
 
-== Testing ==
+## Testing
 
 To run an install test:
 
@@ -56,12 +56,12 @@ The "all" tests can also take an ````---upgrade-from```` option:
 bin/validate all chef-server_11.0.8+20140224180558.git.102.d79b820-1.ubuntu.12.04_amd64.deb --upgrade-from=all
 ````
 
-== Logging ==
+## Logging
 
 Results of all tests are created in a timestamped directory in cache/, and sorted by platform, platform version
 and test type.
 
-== TODO ==
+## TODO
 
   - Automatic rsync of packages. You should be able to specify an arbitrary path to candidate package and
     have the system automatically copy the package over.
@@ -79,3 +79,8 @@ and test type.
   - Add arbitrary numbers of candidate packages for the 'all' test.
 
   - Version-lock chef-metal. Possibly by invoking ````chef-client```` through ````bundle exec```
+
+  - Add parallelization (dependent on chef-metal)
+
+  - Add other tests like ipv6 and convergance tests (stand up a chef-server, stand up a different node that
+    converges against that chef-server)

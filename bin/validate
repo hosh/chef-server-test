@@ -11,6 +11,16 @@ class ValidateCLI < Thor
     ChefServerTest::Tasks::Reset.execute!
   end
 
+  option :'upgrade-from'
+  desc 'all [CANDIDATE PKG]', 'runs all tests'
+  def all(candidate_pkg_path)
+    require 'chef-server-test/tests/all'
+    ChefServerTest::Tests::All.
+      new(candidate_pkg_path: candidate_pkg_path,
+          upgrade_from:       options[:'upgrade-from']).
+      execute!
+  end
+
   desc 'install [CANDIDATE PKG]', 'runs install test'
   def install(candidate_pkg_path)
     require 'chef-server-test/tests/install'
@@ -28,6 +38,7 @@ class ValidateCLI < Thor
           upgrade_from:       options[:'upgrade-from']).
       execute!
   end
+
 
 end
 

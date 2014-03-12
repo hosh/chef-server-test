@@ -1,35 +1,30 @@
 require 'chef-server-test/concerns/test'
 require 'chef-server-test/concerns/valid_upgrade_targets'
+require 'chef-server-test/tests/install'
+require 'chef-server-test/tests/upgrade'
 
+# This test sequentially invokes all the tests
 module ChefServerTest
   module Tests
-    class Upgrade
+    class All
       include ChefServerTest::Concerns::Test
       include ChefServerTest::Concerns::ValidUpgradeTargets
 
       def execute!
         validate_upgrade_targets!
-        info!
 
-        results = upgrade_list.map do |base_version|
-          setup! do
-            ChefServerTest::Config.upgrade_from_version base_version
+        ChefServerTest::Tests::Install.
+          new(candidate_pkg_path: candidate_pkg_path).
+          execute!
 
-            # Disable initial install of candidate pkg so that we can test upgrade
-            ChefServerTest::Config.install_candidate false
-          end
-
-          result = chef_client 'tests::upgrade'
-          [base_version, result.status.success?]
-        end
-
-        puts "", "Summary of test results:"
-        results.each do |version, result|
-          puts "#{version}:   #{(result ? 'success' : 'failure')}"
-        end
+        ChefServerTest::Tests::Upgrade.
+          new(candidate_pkg_path: candidate_pkg_path,
+              upgrade_from:       options[:'upgrade-from']).
+          execute!
       end
 
       def info!
+        puts "Running install test on: #{normalized_candidate_pkg_path}"
         puts "Running upgrade test on: #{normalized_candidate_pkg_path}"
         puts "Upgrading from: #{upgrade_from}"
         puts "Expanded upgrade list:\n  #{upgrade_list.join("\n  ")}"

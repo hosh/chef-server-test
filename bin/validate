@@ -39,6 +39,14 @@ class ValidateCLI < Thor
       execute!
   end
 
+  desc 'converge [CANDIDATE PKG]', 'runs converge test'
+  def converge(candidate_pkg_path)
+    require 'chef-server-test/tests/converge'
+    ChefServerTest::Tests::Converge.
+      new(candidate_pkg_path: candidate_pkg_path).
+      execute!
+  end
+
 
 end
 

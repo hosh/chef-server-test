@@ -44,6 +44,11 @@ module ChefServerTest
     # Jenkins) can drive this.
     configurable :test_run_timestamp
 
+    # This assigns an ip address to the chef-server. It won't matter for
+    # the install and upgrade tests. However, tests such as converge will
+    # need to know how to talk to the chef-server
+    default :chef_server_ip_address, '33.33.33.50'
+
     # Derived values
     default(:vms_path)       { File.join base_path, 'vms' }
     default(:cluster_repo)   { File.join vms_path, 'repo' }
@@ -53,6 +58,9 @@ module ChefServerTest
     default(:data_bags_path) { File.join base_path, 'data_bags' }
 
     default(:host_log_path)  { File.join cache_path, 'logs', test_run_timestamp }
+    default(:host_key_path)  { File.join cache_path, 'keys' }
+    default(:admin_client)   { 'admin' }
+    default(:admin_key_path) { File.join host_key_path, 'admin.pem' }
 
     # Internal settings, usually test-dependent
 
@@ -83,7 +91,14 @@ module ChefServerTest
 
         'test_run_timestamp' => test_run_timestamp,
         'host_log_path' => host_log_path,
-        'local_log_path' => File.join('/', 'tmp', 'cache', test_run_timestamp)
+        'local_log_path' => File.join('/', 'tmp', 'cache', test_run_timestamp),
+
+        'host_key_path' => host_key_path,
+        'local_key_path' => File.join('/', 'tmp', 'cache', 'keys'),
+        'admin_client' => admin_client,
+        'admin_key_path' => admin_key_path,
+
+        'chef_server_ip_address' => chef_server_ip_address
       }
     end
 

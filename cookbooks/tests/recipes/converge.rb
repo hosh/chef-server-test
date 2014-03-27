@@ -18,8 +18,14 @@ ruby_block 'delay' do
   end
 end
 
+include_recipe 'setup::berkshelf'
+
 machine "converge" do
   tag 'converge'
+
+  recipe 'apt' if test_config['package_info']['platform'] == 'ubuntu'
+  recipe 'nginx'
+
   chef_server chef_server_url: "https://#{test_config['chef_server_ip_address']}",
     options: { client_name: test_config['admin_client'], signing_key_filename: test_config['admin_key_path'] }
   local_provisioner_options = {

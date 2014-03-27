@@ -1,0 +1,4 @@
+site :opscode
+
+cookbook 'nginx'
+cookbook 'web', path: '../cookbooks/web'

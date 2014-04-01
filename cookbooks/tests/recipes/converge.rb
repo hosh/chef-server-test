@@ -1,8 +1,9 @@
 include_recipe 'layouts::single'
 
-test_config    = data_bag_item 'tests', 'default'
-local_log_path = File.join(test_config['local_log_path'], 'install', test_config['package_info']['platform_info'])
+test_config     = data_bag_item 'tests', 'default'
+local_log_path  = File.join(test_config['local_log_path'], 'install', test_config['package_info']['platform_info'])
 host_cache_path = test_config['cache_path']
+ip_address      = test_config['converge_ip_address']
 
 machine "chef-server" do
   tag 'converge'
@@ -30,6 +31,7 @@ machine "converge" do
     options: { client_name: test_config['admin_client'], signing_key_filename: test_config['admin_key_path'] }
   local_provisioner_options = {
     'vagrant_config' => <<ENDCONFIG
+config.vm.network "private_network", ip: "#{ip_address}"
 config.vm.synced_folder "#{host_cache_path}", '/tmp/cache'
 ENDCONFIG
   }

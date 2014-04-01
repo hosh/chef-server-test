@@ -49,6 +49,10 @@ module ChefServerTest
     # need to know how to talk to the chef-server
     default :chef_server_ip_address, '33.33.33.50'
 
+    # This assigns an ip address to the coverge node so that we can test
+    # that it has successfully converged against a candidate build
+    default :converge_ip_address, '33.33.33.100'
+
     # Derived values
     default(:vms_path)       { File.join base_path, 'vms' }
     default(:cluster_repo)   { File.join vms_path, 'repo' }
@@ -98,7 +102,8 @@ module ChefServerTest
         'admin_client' => admin_client,
         'admin_key_path' => admin_key_path,
 
-        'chef_server_ip_address' => chef_server_ip_address
+        'chef_server_ip_address' => chef_server_ip_address,
+        'converge_ip_address'    => converge_ip_address
       }
     end
 

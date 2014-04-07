@@ -21,11 +21,16 @@ module ChefServerTest
           new(candidate_pkg_path: candidate_pkg_path,
               upgrade_from:       options[:'upgrade-from']).
           execute!
+
+        ChefServerTest::Tests::Converge.
+          new(candidate_pkg_path: candidate_pkg_path).
+          execute!
       end
 
       def info!
-        puts "Running install test on: #{normalized_candidate_pkg_path}"
-        puts "Running upgrade test on: #{normalized_candidate_pkg_path}"
+        puts "Running install test on: #{candidate_pkg_path}"
+        puts "Running upgrade test on: #{candidate_pkg_path}"
+        puts "Running converge test on #{candidate_pkg_path}"
         puts "Upgrading from: #{upgrade_from}"
         puts "Expanded upgrade list:\n  #{upgrade_list.join("\n  ")}"
       end

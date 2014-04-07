@@ -30,7 +30,8 @@ module ChefServerTest
       end
 
       def info!
-        puts "Running upgrade test on: #{normalized_candidate_pkg_path}"
+        puts "Running upgrade test on: #{candidate_pkg_path}"
+        puts "Cached to #{cached_pkg_path}"
         puts "Upgrading from: #{upgrade_from}"
         puts "Expanded upgrade list:\n  #{upgrade_list.join("\n  ")}"
       end

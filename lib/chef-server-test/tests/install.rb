@@ -7,7 +7,8 @@ module ChefServerTest
 
       def execute!
         setup!
-        puts "Running install test on: #{normalized_candidate_pkg_path}"
+        puts "Running install test on: #{candidate_pkg_path}"
+        puts "Cached to #{cached_pkg_path}"
         chef_client 'tests::install'
       end
     end

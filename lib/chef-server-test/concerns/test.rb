@@ -1,5 +1,6 @@
 require 'rlet'
 require 'chef-server-test/concerns/test_config'
+require 'chef-server-test/tasks/cache-package'
 require 'chef-server-test/shell_out'
 
 module ChefServerTest
@@ -14,8 +15,8 @@ module ChefServerTest
 
         attr_reader :options
 
-        let(:candidate_pkg_path)            { options[:candidate_pkg_path] }
-        let(:normalized_candidate_pkg_path) { normalize_candidate_pkg_path!(candidate_pkg_path) }
+        let(:candidate_pkg_path) { options[:candidate_pkg_path] }
+        let(:cached_pkg_path)    { ChefServerTest::Config.cached_candidate_pkg }
       end
 
       def initialize(options = {})
@@ -23,10 +24,10 @@ module ChefServerTest
       end
 
       def setup!(&blk)
-        ensure_valid_package_name! candidate_pkg_path
         ChefServerTest::Tasks::Reset.execute! # TODO: Add --no-reset option
+        ChefServerTest::Tasks::CachePackage.new(candidate_pkg_path).execute!
         yield if blk
-        generate_test_config!(normalized_candidate_pkg_path)
+        generate_test_config!(cached_pkg_path)
       end
     end
   end

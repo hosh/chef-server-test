@@ -7,7 +7,8 @@ module ChefServerTest
 
       def execute!
         setup!
-        puts "Running converge test on: #{normalized_candidate_pkg_path}"
+        puts "Running converge test on: #{candidate_pkg_path}"
+        puts "Cached to #{cached_pkg_path}"
         chef_client 'tests::converge'
       end
     end

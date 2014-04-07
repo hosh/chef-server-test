@@ -35,6 +35,17 @@ module ChefServerTest
     # bin/validate will accept this in the command line option
     configurable :candidate_pkg
 
+    # Sets the cached package. This is set by Tasks::CachePackage
+    configurable :cached_candidate_pkg
+
+    # Sets the package info for the candidate package. This is
+    # set by Tasks::CachePackage
+    configurable :cached_candidate_pkg_info
+
+    # Sets the full package name with platform and platform
+    # version encoding. Set by Tasks::CachePackage
+    configurable :full_package_name
+
     # This sets the released version from which upgrade tests
     # should upgrade from.
     configurable :upgrade_from_version
@@ -61,6 +72,8 @@ module ChefServerTest
     default(:releases_path)  { File.join cache_path, 'releases' }
     default(:data_bags_path) { File.join base_path, 'data_bags' }
 
+    default(:local_candidate_pkg) { File.join '/tmp', 'cache', 'pkgs', full_package_name }
+
     default(:host_log_path)  { File.join cache_path, 'logs', test_run_timestamp }
     default(:host_key_path)  { File.join cache_path, 'keys' }
     default(:admin_client)   { 'admin' }
@@ -76,7 +89,7 @@ module ChefServerTest
 
     def self.to_hash
       # TODO: Make candidate_pkg always required and cut out the fat here
-      package_info = ChefServerTest::PackageInfo.new(File.basename(candidate_pkg)) if candidate_pkg && !candidate_pkg.empty?
+      #package_info = ChefServerTest::PackageInfo.new(File.basename(candidate_pkg)) if candidate_pkg && !candidate_pkg.empty?
 
       {
         'id'            => 'default',
@@ -86,12 +99,14 @@ module ChefServerTest
         'cache_path'    => cache_path,
         'releases_path' => releases_path,
 
-        'host_candidate_pkg_path' => candidate_pkg,
-        'candidate_pkg'           => (package_info ? package_info.package_name : nil ),
-        'install_candidate'       => install_candidate,
-        'upgrade_from_version'    => upgrade_from_version,
+        'full_package_name'        => full_package_name,
+        'host_candidate_pkg_path'  => cached_candidate_pkg,
+        'local_candidate_pkg_path' => local_candidate_pkg,
+        'candidate_pkg'            => cached_candidate_pkg_info.package_name,
+        'install_candidate'        => install_candidate,
+        'upgrade_from_version'     => upgrade_from_version,
 
-        'package_info' => (package_info ? package_info.to_hash : nil ),
+        'package_info' => cached_candidate_pkg_info.to_hash,
 
         'test_run_timestamp' => test_run_timestamp,
         'host_log_path' => host_log_path,

@@ -1,7 +1,7 @@
 require 'rlet'
 
 module ChefServerTest
-  class PackageInfo
+  class FilenamePackageInfo
     include Let
 
     attr_reader :package_name
@@ -33,6 +33,44 @@ module ChefServerTest
     end
 
     def initialize(package_name)
+      @package_name = package_name
+    end
+  end
+
+  class MetadataPackageInfo
+    include Let
+
+    attr_reader :metadata_path, :package_name
+
+    # Sample
+    # {
+    #   "platform": "ubuntu",
+    #   "platform_version": "12.04",
+    #   "arch": "x86_64",
+    #   "version": "11.1.0-alpha.1+20140403222611.git.7.d52248b"
+    # }
+
+    let(:raw_json)   { File.read(metadata_path) }
+    let(:metadata)   { JSON.parse(raw_json) }
+
+    let(:version)          { metadata['version'] }
+    let(:platform)         { metadata['platform'] }
+    let(:platform_version) { metadata['platform_version'] }
+    let(:arch)             { metadata['arch'] }
+    let(:platform_info)    { "#{platform}.#{platform_version}" }
+
+    let(:to_hash) do
+      {
+        'version'          => version,
+        'platform'         => platform,
+        'platform_version' => platform_version,
+        'platform_info'    => platform_info,
+        'arch'             => arch
+      }
+    end
+
+    def initialize(metadata_path, package_name)
+      @metadata_path = metadata_path
       @package_name = package_name
     end
   end

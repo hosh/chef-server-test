@@ -2,6 +2,7 @@ require 'chef-server-test/concerns/test'
 require 'chef-server-test/concerns/valid_upgrade_targets'
 require 'chef-server-test/tests/install'
 require 'chef-server-test/tests/upgrade'
+require 'chef-server-test/tests/converge'
 
 # This test sequentially invokes all the tests
 module ChefServerTest

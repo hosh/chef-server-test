@@ -49,7 +49,7 @@ module ChefServerTest
       # This takes relatively long, so we try to do this as a last resort.
       # TODO: Guard this so only debs are extracted
       def extract_metadata!
-        shell_out "tar zOxf #{package_path} data.tar.gz | tar zOxf - ./opt/chef-server/build-metadata.json > #{temp_metadata_path}"
+        shell_out "tar zOxf #{package_path} data.tar.gz | tar zOxf - ./opt/chef-server/version-manifest.json > #{temp_metadata_path}"
       end
 
       def initialize(_package_path)

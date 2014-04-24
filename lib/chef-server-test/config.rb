@@ -55,14 +55,33 @@ module ChefServerTest
     # Jenkins) can drive this.
     configurable :test_run_timestamp
 
+    default :verbose, false
+
+    # Networking
+
+    # This flips on ipv6-only
+    # Valid values: :ipv4, :ipv6, :mixed
+    default :networking_mode, :ipv4
+    default :host_ipv6_address,         'fd83:4e09:e1b6:e2a3::10'
+
+    # Set this to determine the bridge to use
+    default(:host_ipv6_interface)       { host_osx? ? host_ipv6_osx_interface : host_ipv6_linux_interface }
+    default(:vagrant_ipv6_interface)    { host_osx? ? vagrant_ipv6_osx_interface : vagrant_ipv6_lnx_interface }
+    default :host_ipv6_osx_interface,    'en0'
+    default :vagrant_ipv6_osx_interface, 'en0: Ethernet' # Because Vagrant (or VirtualBox?) is weird like this
+    default :host_ipv6_linux_interface,  'eth0'
+    default :vagrant_ipv6_lnx_interface, 'eth0: Ethernet'
+
     # This assigns an ip address to the chef-server. It won't matter for
     # the install and upgrade tests. However, tests such as converge will
     # need to know how to talk to the chef-server
-    default :chef_server_ip_address, '33.33.33.50'
+    default :chef_server_ipv4_address, '33.33.33.50'
+    default :chef_server_ipv6_address, 'fd83:4e09:e1b6:e2a3::50'
 
     # This assigns an ip address to the coverge node so that we can test
     # that it has successfully converged against a candidate build
-    default :converge_ip_address, '33.33.33.100'
+    default :converge_ipv4_address, '33.33.33.100'
+    default :converge_ipv6_address, 'fd83:4e09:e1b6:e2a3::100'
 
     # Derived values
     default(:vms_path)       { File.join base_path, 'vms' }
@@ -79,14 +98,22 @@ module ChefServerTest
     default(:admin_client)   { 'admin' }
     default(:admin_key_path) { File.join host_key_path, 'admin.pem' }
 
+    default(:use_ipv6?)              { networking_mode == :ipv6 || networking_mode == :mixed }
+    default(:chef_server_ip_address) { use_ipv6? ? chef_server_ipv6_address : chef_server_ipv4_address }
+    default(:converge_ip_address)    { use_ipv6? ? converge_ipv6_address : converge_ipv4_address }
+
     # Internal settings, usually test-dependent
 
     # If a candidate package is available, install it.
     # Upgrade tests will set set this to false.
     default :install_candidate, true
 
-    # Glue layer for generating config for chef-client
+    # Helpers
+    def self.host_osx?
+      /darwin/ =~ RUBY_PLATFORM
+    end
 
+    # Glue layer for generating config for chef-client
     def self.to_hash
       # TODO: Make candidate_pkg always required and cut out the fat here
       #package_info = ChefServerTest::PackageInfo.new(File.basename(candidate_pkg)) if candidate_pkg && !candidate_pkg.empty?
@@ -117,6 +144,9 @@ module ChefServerTest
         'admin_client' => admin_client,
         'admin_key_path' => admin_key_path,
 
+        'use_ipv6'               => use_ipv6?,
+        'host_ipv6_interface'    => host_ipv6_interface,
+        'vagrant_ipv6_interface' => vagrant_ipv6_interface,
         'chef_server_ip_address' => chef_server_ip_address,
         'converge_ip_address'    => converge_ip_address
       }

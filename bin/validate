@@ -6,8 +6,12 @@ require 'thor'
 require 'chef-server-test/config'
 
 class ValidateCLI < Thor
+  class_option :verbose, type: :boolean
+  class_option :ipv6, type: :boolean
+
   desc 'reset', 'resets tests'
   def reset
+    set_global_options!
     ChefServerTest::Tasks::Reset.execute!
   end
 
@@ -15,6 +19,7 @@ class ValidateCLI < Thor
   desc 'all [CANDIDATE PKG]', 'runs all tests'
   def all(candidate_pkg_path)
     require 'chef-server-test/tests/all'
+    set_global_options!
     ChefServerTest::Tests::All.
       new(candidate_pkg_path: candidate_pkg_path,
           upgrade_from:       options[:'upgrade-from']).
@@ -24,6 +29,7 @@ class ValidateCLI < Thor
   desc 'install [CANDIDATE PKG]', 'runs install test'
   def install(candidate_pkg_path)
     require 'chef-server-test/tests/install'
+    set_global_options!
     ChefServerTest::Tests::Install.
       new(candidate_pkg_path: candidate_pkg_path).
       execute!
@@ -33,6 +39,7 @@ class ValidateCLI < Thor
   desc 'upgrade [CANDIDATE PKG]', 'runs upgrade test'
   def upgrade(candidate_pkg_path)
     require 'chef-server-test/tests/upgrade'
+    set_global_options!
     ChefServerTest::Tests::Upgrade.
       new(candidate_pkg_path: candidate_pkg_path,
           upgrade_from:       options[:'upgrade-from']).
@@ -42,12 +49,25 @@ class ValidateCLI < Thor
   desc 'converge [CANDIDATE PKG]', 'runs converge test'
   def converge(candidate_pkg_path)
     require 'chef-server-test/tests/converge'
+    set_global_options!
     ChefServerTest::Tests::Converge.
       new(candidate_pkg_path: candidate_pkg_path).
       execute!
   end
 
+  desc 'ipv6 [interface]', 'Setup ipv6 on Host machine'
+  def ipv6(interface = 'en0')
+    require 'chef-server-test/tasks/host-ipv6'
+    set_global_options!
+    ChefServerTest::Tasks::HostIPv6.new(interface: interface).execute!
+  end
 
+  private
+
+  def set_global_options!
+    ChefServerTest::Config.verbose = options[:verbose]
+    ChefServerTest::Config.networking_mode = :mixed if options[:ipv6]
+  end
 end
 
 ValidateCLI.start(ARGV)

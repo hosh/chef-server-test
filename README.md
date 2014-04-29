@@ -11,16 +11,16 @@ Make sure you have:
 
   - Vagrant 1.3+
   - Ruby 1.9.3+
-  - chef-metal gem installed
 
-Clone the project:
+Clone the project, then run bundle install
 
 ````
 git clone git://github.com/hosh/chef-server-test.git
+cd chef-server-test
+git submodule init
+git submodule update
+bundle install
 ````
-
-Create a directory called ````cache/```` inside the repo. Copy the deb or rpm
-you want to test into the directory.
 
 ## Testing
 
@@ -51,9 +51,32 @@ To run both an install and upgrade
 bin/validate all chef-server_11.0.8+20140224180558.git.102.d79b820-1.ubuntu.12.04_amd64.deb
 ````
 
+To run a converge test
+````
+bin/validate all chef-server_11.0.8+20140224180558.git.102.d79b820-1.ubuntu.12.04_amd64.deb
+````
+
 The "all" tests can also take an ````---upgrade-from```` option:
 ````
 bin/validate all chef-server_11.0.8+20140224180558.git.102.d79b820-1.ubuntu.12.04_amd64.deb --upgrade-from=all
+````
+
+## Testing ipv6
+
+You can test in ipv6 mode. First, you need to set up an ipv6 interface on your box:
+
+```
+sudo bin/validate ipv6
+```
+
+Important: If you are running this in OSX, you will want to plug the ethernet into a switch. For whatever
+reason, some versions of OSX becomes unstable running in ipv6 mode against the wireless interface.
+
+Once you have done this, you can run the tests with the ```--ipv6``` flag. For example, to run the
+converge test in ipv6 mode,
+
+````
+bin/validate all chef-server_11.0.8+20140224180558.git.102.d79b820-1.ubuntu.12.04_amd64.deb --ipv6
 ````
 
 ## Logging

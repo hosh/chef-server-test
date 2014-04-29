@@ -1,5 +1,5 @@
 require 'cheffish'
-require 'chef_metal/vagrant'
+require 'chef_metal_vagrant'
 
 test_config  = data_bag_item 'tests', 'default'
 base_path    = test_config['base_path']

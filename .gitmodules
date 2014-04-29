@@ -1,3 +1,9 @@
 [submodule "chef-server"]
 	path = cookbooks/chef-server
 	url = git://github.com/hosh/chef-server.git
+[submodule "cookbooks/hostfile"]
+	path = cookbooks/hostfile
+	url = git://github.com/customink-webops/hostsfile.git
+[submodule "cookbooks/hostsfile"]
+	path = cookbooks/hostsfile
+	url = git://github.com/customink-webops/hostsfile.git

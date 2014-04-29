@@ -6,7 +6,7 @@ SHELLOUT_DEFAULTS = { cwd: BASE_DIR }
 module ChefServerTest
   module ShellOut
     def chef_client(recipes)
-      cmd = shell_out "chef-client #{ChefServerTest::Config.chef_client_flags} -o #{recipes}"
+      cmd = bundle_exec "chef-client #{ChefServerTest::Config.chef_client_flags} -o #{recipes}"
       return if cmd.status.success?
       $stderr.print "ERROR: #{cmd.exitstatus}\nSTDERR:\n #{cmd.stderr}\n"
       $stderr.print "Failure."
@@ -28,12 +28,20 @@ module ChefServerTest
       exit 1
     end
 
+    def bundle_exec(cmd, options = {})
+      shell_out "bundle exec #{cmd}", options
+    end
+
+    def bundle_exec!(cmd, options = {})
+      shell_out! "bundle exec #{cmd}", options
+    end
+
     def sudo(cmd, options = {})
-      shell_out("sudo #{cmd}", options)
+      shell_out "sudo #{cmd}", options
     end
 
     def sudo!(cmd, options = {})
-      shell_out!("sudo #{cmd}", options)
+      shell_out! "sudo #{cmd}", options
     end
   end
 end

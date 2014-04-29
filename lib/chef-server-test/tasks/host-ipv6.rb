@@ -17,6 +17,7 @@ module ChefServerTest
       def execute!
         info!
         # Override from command line
+        # TODO: Put this into a recipe. We are already using a hostfile recipe anyways
         ChefServerTest::Config.host_ipv6_interface requested_interface if requested_interface
         if host_osx?
           sudo "ifconfig #{interface} inet6 #{host_addr} delete || true"
@@ -25,6 +26,8 @@ module ChefServerTest
           sudo "/sbin/ip -6 addr del #{host_addr} dev '#{interface}' || true"
           sudo "/sbin/ip -6 addr add #{host_addr} dev '#{interface}' || true"
         end
+
+        chef_client 'setup::hostfile'
       end
 
       def info!

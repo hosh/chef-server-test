@@ -9,6 +9,7 @@ machine "chef-server" do
   attribute %w(chef-server-test log_path), local_log_path
 
   recipe 'chef-server'
-  recipe 'chef-server-upgrade'
+  recipe 'chef-server-config::ipv6' if test_config['use_ipv6']
+  recipe 'chef-server-config::upgrade'
   recipe 'pedant::full'
 end

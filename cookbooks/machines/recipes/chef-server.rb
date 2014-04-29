@@ -21,6 +21,7 @@ machine "chef-server" do
   attribute %w(chef-server package_file), candidate_pkg if candidate_pkg && install_candidate
   attribute %w(chef-server candidate_pkg), candidate_pkg
   attribute %w(chef-server version), upgrade_from if upgrade_from
+  attribute %w(host ipv6_address), ip_address if test_config['use_ipv6']
 
   local_provisioner_options = {
     'vagrant_config' => <<ENDCONFIG
@@ -30,4 +31,14 @@ ENDCONFIG
   }
 
   provisioner_options ChefMetal.enclosing_provisioner_options.merge(local_provisioner_options)
+end
+
+if test_config['use_ipv6']
+  machine_execute "/sbin/ip -6 addr add #{ip_address}/64 dev eth1 || true" do
+    machine 'chef-server'
+  end
+
+  machine_execute "/sbin/ip -4 addr delete dev eth1 || true" do
+    machine 'chef-server'
+  end
 end

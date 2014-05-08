@@ -7,22 +7,23 @@ module ChefServerTest
   module ShellOut
     def chef_client(recipes)
       cmd = bundle_exec "chef-client #{ChefServerTest::Config.chef_client_flags} -o #{recipes}"
-      return if cmd.status.success?
+      return cmd if cmd.status.success?
       $stderr.print "ERROR: #{cmd.exitstatus}\nSTDERR:\n #{cmd.stderr}\n"
       $stderr.print "Failure."
       cmd
     end
 
-    def shell_out(cmd, options = {})
-      puts "$ #{cmd}" if ChefServerTest::Config.verbose
+    def shell_out(_cmd, options = {})
+      puts "$ #{_cmd}" if ChefServerTest::Config.verbose
       options = SHELLOUT_DEFAULTS.merge(timeout: 3600).merge(options)
-      cmd = Mixlib::ShellOut.new(cmd, options)
+      cmd = Mixlib::ShellOut.new(_cmd, options)
       cmd.live_stream = STDOUT
       cmd.run_command
+      cmd
     end
 
-    def shell_out!(cmd, options = {})
-      cmd = run_command(cmd, options)
+    def shell_out!(_cmd, options = {})
+      cmd = run_command(_cmd, options)
       return if cmd.status.success?
       $stderr.print "ERROR: #{cmd.exitstatus}\nSTDOUT:\n#{cmd.stdout}\n\nSTDERR:\n#{cmd.stderr}\n"
       exit 1

@@ -13,7 +13,7 @@ module ChefServerTest
         let(:parsed_upgrade_from) { Array(upgrade_from.to_s.gsub(/\s+/, '').split(',')).uniq }
         let(:requesting_all?) { upgrade_from == 'all' }
 
-        let(:available_releases) { %w(11.0.4 11.0.6 11.0.8 11.0.10 11.0.11) }
+        let(:available_releases) { %w(11.0.4 11.0.6 11.0.8 11.0.10 11.0.11 11.0.12) }
         let(:valid_upgrade_target) { ->(x) { x =~ /\d+\.\d+\.\d+|latest/ } }
       end
 
